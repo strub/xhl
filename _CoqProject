@@ -5,6 +5,15 @@
 
 -R . xhl
 
+pwhile/inhabited.v
+pwhile/notations.v
+pwhile/passn.v
+pwhile/psemantic.v
+pwhile/pwhile.v
+pwhile/range.v
+ellora/ellora.v
+ellora/sound.v
+ellora/complete.v
 strassen/misc.v
 strassen/xbigops.v
 strassen/lp.v

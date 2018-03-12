@@ -1,4 +1,5 @@
 /attic/
+/xhl/
 
 *.d
 *.o
@@ -12,3 +13,6 @@
 
 Makefile.coq
 Makefile.coq.conf
+
+*.tar.gz
+*.tar.bz2

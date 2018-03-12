@@ -7,6 +7,8 @@ Makefile.common
 _CoqProject
 
 # *.v
+pwhile/*.v
+ellora/*.v
 strassen/*.v
 
 # Build scripts
