@@ -1,0 +1,13 @@
+-arg -w
+-arg -parsing
+-arg -w
+-arg -projection-no-head-constant
+
+-R . xhl
+
+strassen/misc.v
+strassen/xbigops.v
+strassen/lp.v
+strassen/maxflow.v
+strassen/elift.v
+strassen/strassen.v
