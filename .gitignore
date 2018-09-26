@@ -1,5 +1,7 @@
 /attic/
 /xhl/
+/html/
+/coqdocjs/
 
 *.d
 *.o

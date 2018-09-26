@@ -19,6 +19,23 @@ this-distclean::
 	rm -f $(shell find . -name '*~')
 
 # --------------------------------------------------------------------
+.PHONY: html
+
+COQDOCJS    := coqdocjs
+COQDOCFLAGS := \
+  -R . xhl --html --interpolate \
+  --external 'http://math-comp.github.io/math-comp/htmldoc/' mathcomp \
+  --index indexpage --no-lib-name --parse-comments \
+  --with-header $(COQDOCJS)/extra/header.html \
+  --with-footer $(COQDOCJS)/extra/footer.html
+
+export COQDOCFLAGS
+
+html: config build
+	rm -rf html && $(COQMAKE) html
+	cp $(COQDOCJS)/extra/resources/* html
+
+# --------------------------------------------------------------------
 .PHONY: count dist
 
 # --------------------------------------------------------------------
