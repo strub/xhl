@@ -123,7 +123,7 @@ Lemma edist_le_supp ε δ (μ1 μ2 : distr A) : 0 <= ε ->
       \P_[μ1] S <= Ω ε * \P_[μ2] S + δ)
   -> (edist ε μ1 μ2 <= δ).
 Proof.
-move=> ge0_e; set P := [predU dinsupp μ1 & dinsupp μ2]=> h.
+move=> ge0_e; set P := [predU dinsupp μ1 & dinsupp μ2] => h.
 apply/edist_le=> // S; rewrite (prID _ P μ1) (prID _ P μ2).
 rewrite mulrDr addrAC ler_add //; first by apply/h=> x /andP[].
 by rewrite !eq0_pr ?mulr0 // => x {h}h; rewrite !inE h ?orbT andbF.

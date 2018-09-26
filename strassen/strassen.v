@@ -774,7 +774,7 @@ Lemma pr_dfinrestr (X : pred c) :
   \P_[dfinrestr] X = \P_[μ] (rlift X false).
 Proof.
 rewrite [in RHS]/pr (psum_finseq (r := (enum_fset c))).
-+ by apply/enum_fset_uniq.
++ by apply/fset_uniq.
 + move=> x; rewrite {1}/in_mem /= mulf_eq0 negb_or => /andP[].
   by rewrite /rlift; case: {-}_ / idP => //; rewrite eqxx.
 rewrite -big_fset_seq /= /pr psum_fin; apply/eq_bigr => /= x _.
@@ -884,7 +884,7 @@ Context (ε δ : R) (μ1 : distr A) (μ2 : distr B) (S : pred (A * B)).
 Hypothesis (ge0_ε : 0 <= ε) (ge0_δ : 0 <= δ).
 
 Definition E {T : countType} i : {fset T} :=
-  seq_fset (pmap unpickle (iota 0 i)).
+  seq_fset tt (pmap unpickle (iota 0 i)).
 
 Definition imS (X : pred A) :=
   [pred y | `[< exists2 x, x \in X & S (x, y) >]].
@@ -988,7 +988,7 @@ exists (ξL, ξR) => /=; split => [a|b|||].
     - by move=> n b; rewrite ger0_norm // (ge0_mu, hLR).
   pose pa := pickle a; have ->: μ1 a = nlim (fun n => η1 (ω n) a).
   * rewrite -(nlim_lift _ pa.+1) (eq_nlim (v := (μ1 a)%:S)) ?nlimC //.
-    move=> n /=; rewrite drestrE /E /= seq_fsetE mem_pmap.
+    move=> n /=; rewrite drestrE /E /= sort_keysE mem_pmap.
     case: mapP => // -[]; exists pa; rewrite ?pickleK //.
     rewrite mem_iota leq0n add0n (@leq_trans (n + pa.+1)) //.
     - by rewrite leq_addl.
@@ -1004,7 +1004,7 @@ exists (ξL, ξR) => /=; split => [a|b|||].
     - by move=> n a; rewrite ger0_norm // (ge0_mu, hRL).
   pose pb := pickle b; have ->: μ2 b = nlim (fun n => η2 (ω n) b).
   * rewrite -(nlim_lift _ pb.+1) (eq_nlim (v := (μ2 b)%:S)) ?nlimC //.
-    move=> n /=; rewrite drestrE /E /= seq_fsetE mem_pmap.
+    move=> n /=; rewrite drestrE /E /= sort_keysE mem_pmap.
     case: mapP => // -[]; exists pb; rewrite ?pickleK //.
     rewrite mem_iota leq0n add0n (@leq_trans (n + pb.+1)) //.
     - by rewrite leq_addl.

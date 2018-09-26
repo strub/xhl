@@ -290,7 +290,7 @@ Definition aenum : seq apath :=
 
 Lemma uniq_aenum : uniq aenum.
 Proof.
-rewrite /aenum -(map_inj_uniq Some_inj) pmapS_filter.
+rewrite /aenum -(map_inj_uniq (@Some_inj _)) pmapS_filter.
 rewrite map_inj_in_uniq.
 + move=> x y; rewrite !mem_filter => /andP[hx _] /andP[hy _].
   rewrite !insubT //=; try by rewrite !isSome_insub in hx, hy.
@@ -306,7 +306,7 @@ Qed.
 Lemma aenum_finAxiom : Finite.axiom aenum.
 Proof.
 move=> s; rewrite count_uniq_mem ?uniq_aenum // (rwP eqP) eqb1.
-case: s=> s Ps; rewrite -(mem_map Some_inj) pmapS_filter.
+case: s=> s Ps; rewrite -(mem_map (@Some_inj _)) pmapS_filter.
 apply/mapP; exists s; rewrite ?insubT //.
 rewrite mem_filter insubT; apply/flattenP.
 pose t := map val (enum {: (size s).-tuple T}); exists t.
