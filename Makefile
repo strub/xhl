@@ -13,7 +13,7 @@ install:
 
 # --------------------------------------------------------------------
 this-clean::
-	rm -f strassen/.*.aux
+	rm -f */.*.aux
 
 this-distclean::
 	rm -f $(shell find . -name '*~')
