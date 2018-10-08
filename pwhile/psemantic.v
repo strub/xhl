@@ -478,7 +478,7 @@ Proof. by move=> m;rewrite !semE dlet_unit. Qed.
 
 Lemma seq_skip_r (c : cmd) : (c ;; skip) =C c.
 Proof.
-move=> m;rewrite semE -[X in _ = X]dlet_dunit_id;
+move=> m; rewrite semE -[X in _ = X]dlet_dunit_id;
 by apply eq_in_dlet => // ??; rewrite semE.
 Qed.
 
@@ -648,9 +648,13 @@ Notation rsem    := (@ssem_ _ rmem).
 Notation rmdistr := (Distr rmem.(mheap)).
 Notation rmnull  := (@dnull R rmem.(mheap)).
 
-Notation "m .[ x @ s <- v ]" := m.[(x, s) <- v].
+Notation "m .[ x @ s <- v ]" := m.[x # s <- v].
 Notation "m .[~1 x <- v ]"   := m.[x @ '1 <- v].
 Notation "m .[~2 x <- v ]"   := m.[x @ '2 <- v].
+
+Lemma mselect_mset T s s' (m : rmem) (x : vars T) (v : T) :
+  m.[x @ s <- v] # s' = if s == s' then (m#s).[x <- v] else m#s'.
+Proof. by case: s s' x => [] [] []. Qed.
 
 Lemma esem_iE T s (e : expr T) (m : rmem) : esem (e#s) m = esem e m#s.
 Proof. by elim: e => {T} /= [ ?[?]| | | ??? -> ? ->]. Qed.

@@ -16,13 +16,12 @@ Local Open Scope syn_scope.
 Local Open Scope sem_scope.
 Local Open Scope mem_scope.
 
+(* -------------------------------------------------------------------- *)
 Definition range {A : choiceType} (P : pred A) (mu : Distr A) := 
   forall m, m \in dinsupp mu -> P m.  
 
 Section Range.
 Context {A B : choiceType}.
-
-(* Implicit Types (P : pred A) (mu : Distr A) (f : A -> Distr B). *)
 
 Lemma range_dnull (P : pred A) : range P dnull.
 Proof. by move=> x /dinsuppP; rewrite dnullE. Qed.
@@ -122,11 +121,11 @@ Proof. by move=> ??;rewrite ssemE;apply range_dunit. Qed.
 Lemma phl_abort (P Q : assn) : phl P abort Q.
 Proof. by move=> ??;rewrite ssemE;apply range_dnull. Qed.
 
-Lemma phl_assign (T:ihbType) x (e:expr_ X mem T) (Q : assn):
+Lemma phl_assign {T : ihbType} x (e:expr_ X mem T) (Q : assn):
    phl [pred m | Q m.[x <- `[{e}]%A m]] (x <<- e) Q.
 Proof. by move=> m /=;rewrite !semE;apply range_dunit. Qed.
 
-Lemma phl_random (T:ihbType) x (d:expr_ X mem (Distr T)) (Q : assn):
+Lemma phl_random {T : ihbType} x (d:expr_ X mem (Distr T)) (Q : assn):
    phl `[forall v in `[{d}] | m => Q m.[x <- v]] (x <$- d) Q.
 Proof. 
 move=> m /asboolP /= h; rewrite !semE.

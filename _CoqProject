@@ -11,6 +11,7 @@ pwhile/passn.v
 pwhile/psemantic.v
 pwhile/pwhile.v
 pwhile/range.v
+prhl/prhl.v
 ellora/ellora.v
 ellora/sound.v
 ellora/complete.v
