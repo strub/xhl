@@ -443,7 +443,7 @@ rewrite -ssem_seqE; case/asboolP: (esem e' m) => [|/negP h].
   by move/ihn. by apply/a.
 Qed.
 
-Lemma split_while (e1 e2:expr bool) c:
+Lemma split_while (e1 e2 : expr bool) c:
      ssem (While e1 Do c)
    = ssem (While (e1 && e2) Do c ;; While e1 Do c).
 Proof. by apply/funext=> m; apply/unrolls_while_w => {m} m /= /andP[]. Qed.
@@ -592,6 +592,67 @@ Proof.
 rewrite ssem_iterop_iter; elim: n => [|n ih] /=.
   by rewrite seq_skip_l.
 by rewrite -seqA -ih => m; rewrite unroll_while.
+Qed.
+
+(* -------------------------------------------------------------------- *)
+Lemma if_same (e : expr bool) c : If e then c else c =C c.
+Proof. by move=> m; rewrite !semE; case: (esem _ _). Qed.
+
+(* -------------------------------------------------------------------- *)
+Lemma if_seq (e : expr bool) c c1 c2 :
+  (If e then c1 else c2 ;; c) =C If e then (c1 ;; c) else (c2 ;; c).
+Proof. by move=> m; rewrite !semE; case: ifPn. Qed.
+
+(* -------------------------------------------------------------------- *)
+Lemma le_while (e : expr bool) c1 c2 m :
+     (forall m, esem e m -> ssem_ c1 m <=1 ssem_ c2 m)
+  -> ssem_ (While e Do c1) m <=1 ssem_ (While e Do c2) m.
+Proof.
+move=> lec m'; rewrite !semE; apply/le_dlim/dcvg_whilen => n.
+elim: n m => //= n ihn m {m'}m'; rewrite !semE.
+by case: ifP => // hem; apply/le_dlet => {m'} m' //; apply: lec.
+Qed.
+
+(* -------------------------------------------------------------------- *)
+Lemma xsplit_while (e e1 e2 : expr bool) c:
+     (forall m, esem e2 m -> esem e m)
+  -> (forall m, esem e m -> ~~ esem e1 m -> esem e2 m)
+  -> (While e Do c) =C (While e Do (If e1 then c else While e2 Do c)).
+Proof.
+move=> h1 h2 m; apply/distr_eqP => m'.
+rewrite (rwP eqP) eqr_le -(rwP andP); split; last first.
+  rewrite semE; apply: leub_dlim => {m'} n m'.
+  elim: n m m' => /= [|n ihn] m m'; first by rewrite !semE lef_dnull.
+  rewrite semE; case: ifP => hem; last first.
+    by rewrite unroll_while_in ssem_ifE hem.
+  rewrite if_seq ssem_ifE; case: ifPn => he1m.
+    by rewrite unroll_while_in ssem_ifE hem !ssem_seqE le_dlet.
+  by rewrite (unrolls_while_w _ _ h1) !ssem_seqE le_dlet.
+rewrite ssem_whileE; apply: leub_dlim => {m'} n m'.
+elim: n m m' => /= [|n ihn] m m'; first by rewrite !semE lef_dnull.
+rewrite semE; case: ifP => hem; last first.
+  by rewrite unroll_while_in ssem_ifE hem.
+rewrite unroll_while_in ssem_ifE hem 2![in X in _ <= X]semE.
+case: ifPn => he1m; first by rewrite !ssem_seqE le_dlet.
+rewrite unroll_while -!ssem_seqE -seqA 2![in X in _ <= X]semE.
+rewrite (h2 _ hem he1m) ssem_seqE le_dlet => // {m m' hem he1m} m _ m'.
+rewrite 2!semE dlet_lim; last by apply: homo_whilen.
+apply: (ler_trans _ (dlim_ub n _ _)); last first.
+  move=> k1 k2 le_k1k2 {m'} m'; apply: le_dlet => //.
+  by move=> {m'} m'; apply: homo_whilen.
+elim: n m m' ihn => /= [|k ihk] m m' ihn; first by rewrite semE lef_dnull.
+rewrite !ssem_ifE; case: ifP => hem; last first.
+  case: ifPn => [/h1|he2m]; first by rewrite hem.
+  by rewrite -ssem_seqE seq_skip_l unroll_while_in ssem_ifE hem.
+case: ifPn => he2m; rewrite -!ssem_seqE.
+  rewrite -seqA 2!ssem_seqE le_dlet => // {m m' hem he2m} m _ m'.
+  rewrite ssem_seqE; apply: ihk => {m m'} m m'.
+  by apply: (ler_trans (le_whilen _ _ _ _ _)) => /=.
+rewrite seq_skip_l unroll_while_in ssem_ifE hem.
+rewrite 2![in X in _ <= X]semE; case: ifPn => [he1m|]; last first.
+  by move/(h2 _ hem); rewrite (negbTE he2m).
+rewrite ssem_seqE le_dlet => // {m m' hem he1m he2m} m _ m'.
+by apply: (ler_trans (le_whilen _ _ _ _ _)).
 Qed.
 
 (* -------------------------------------------------------------------- *)
