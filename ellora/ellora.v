@@ -1,7 +1,7 @@
 (* -------------------------------------------------------------------- *)
 (* ------- *) Require Import Setoid Morphisms.
 From mathcomp Require Import all_ssreflect all_algebra.
-From mathcomp.analysis Require Import boolp reals realseq realsum distr.
+From mathcomp.analysis Require Import boolp ereal reals realseq realsum distr.
 From xhl.pwhile Require Import notations inhabited pwhile psemantic passn range.
 
 Set   Implicit Arguments.
@@ -9,7 +9,7 @@ Unset Strict Implicit.
 Unset Printing Implicit Defensive.
 Unset SsrOldRewriteGoalsOrder.
 
-Import GRing.Theory Num.Theory.
+Import GRing.Theory Num.Theory Order.Theory.
 
 Local Open Scope ring_scope.
 Local Open Scope syn_scope.
@@ -83,7 +83,7 @@ Lemma tclosed_uclosed (P : nat -> dassn) Pinf :
   tclosed P Pinf -> uclosed P Pinf.
 Proof.
 move=> uc mu h1 h2; apply/uc => // x; apply/ncvg_mono_bnd => [??/h2|] //.
-apply/asboolP/nboundedP; exists 2%:R => // n; apply/(@ler_lt_trans _ 1).
+apply/asboolP/nboundedP; exists 2%:R => // n; apply/(@le_lt_trans _ _ 1).
 + by rewrite ger0_norm ?(ge0_mu, le1_mu1). + by rewrite (@ltr_nat _ 1).
 Qed.
 
@@ -124,9 +124,9 @@ have ->: \dlim_(n) F n = \dlim_(n) F n.+1.
 rewrite {}/F; apply/tcP=> [|m]; first by move=> n; apply/h.
 apply/ncvg_mono_bnd => [n p le_np|]; last first.
   apply/asboolP/nboundedP; exists 2%:R => // n.
-  apply/(@ler_lt_trans _ 1); last by rewrite (@ltr_nat _ 1).
+  apply/(@le_lt_trans _ _ 1); last by rewrite (@ltr_nat _ 1).
   by rewrite ger0_norm ?(ge0_mu, le1_mu1).
-by apply/le_in_dlet=> {m} m _ m'; apply/homo_whilen.
+by apply/le_in_dlet=> {}m _ m'; apply/homo_whilen.
 Qed.
 
 (* -------------------------------------------------------------------- *)
@@ -145,12 +145,12 @@ Lemma dclosed_while P b c : dclosed P ->
      (forall mu, mu \in P -> dssem (IfT b then c) mu \in P)
   -> (forall mu, mu \in P -> dssem (While b Do c) mu \in P).
 Proof.
-move=> [tcP dwP] h mu muP; apply/Xclosed_while => // {mu muP} mu n muP.
+move=> [tcP dwP] h mu muP; apply/Xclosed_while => // {muP} mu n muP.
 rewrite whilen_iterc; set cn := iterc _ _.
 move/(_ (dssem cn mu)): dwP; apply; first by apply/Xclosed_iterc.
-move=> m; apply/le_in_dlet=> {m} m _ m'; rewrite ssemE.
+move=> m; apply/le_in_dlet=> {}m _ m'; rewrite ssemE.
 rewrite -[X in _ <= _ X _]dlet_dunit_id; apply/le_in_dlet.
-move=> {m m'} m _ m'; rewrite ssemE; case: ifP=> _.
+move=> {m'} m _ m'; rewrite ssemE; case: ifP=> _.
   by rewrite ssemE; apply/lef_dnull. by rewrite ssemE.
 Qed.
 

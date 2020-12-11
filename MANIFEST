@@ -3,11 +3,12 @@ MANIFEST
 
 # Dev
 Makefile
-Makefile.common
-_CoqProject
+dune-project
+dune
 
 # *.v
 pwhile/*.v
+prhl/*.v
 ellora/*.v
 strassen/*.v
 

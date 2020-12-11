@@ -38,7 +38,7 @@ Lemma dinsupp_dlim (mu : nat -> Distr A) x:
   x \in dinsupp (\dlim_(n) mu n) ->
     exists k, x \in dinsupp (mu k).
 Proof.
-move/dinsuppP; rewrite dlimE; apply: contrapR.
+move/dinsuppP; rewrite dlimE; apply: contra_notP.
 move/asboolPn/forallp_asboolPn => eq; rewrite (@eq_nlim _ (fun _ => 0)).
   by move=> n; apply/dinsuppPn/negP/eq.
   by rewrite nlimC.
@@ -191,7 +191,7 @@ Fixpoint mod (c : cmd) : pred { t : ihbType & vars t } :=
   end.
 
 (* -------------------------------------------------------------------- *)
-Fixpoint eaccess {t} (e : expr t) : pred { t : ihbType & vars t } :=
+Definition eaccess {t} (e : expr t) : pred { t : ihbType & vars t } :=
   match e with
   | var_ _ x => [pred y | `[<y = Tagged _ x>]]
   | _ => pred0

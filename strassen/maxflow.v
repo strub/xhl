@@ -7,7 +7,7 @@ Unset Strict Implicit.
 Unset Printing Implicit Defensive.
 Unset SsrOldRewriteGoalsOrder.
 
-Import GRing.Theory Num.Theory.
+Import GRing.Theory Num.Theory Order.Theory.
 
 Local Open Scope ring_scope.
 
@@ -109,7 +109,7 @@ Notation "{ 'network' T }" := (network_of (Phant T)).
 Lemma network_ge0 {T : finType} (g : {network T}) e : 0 <= g e.
 Proof. by case: g => /= g /networkP /(_ e). Qed.
 
-Hint Immediate network_ge0.
+Hint Immediate network_ge0 : core.
 
 (* -------------------------------------------------------------------- *)
 Section Flow.
@@ -194,7 +194,7 @@ Qed.
 Lemma isflow_flow : (fun_of_flow f) \is a g.-flow.
 Proof. by apply/valP. Qed.
 
-Hint Resolve isflow_flow.
+Hint Resolve isflow_flow : core.
 
 Lemma flow_lecp e : f e <= g e.
 Proof. by apply/isflow_lecp. Qed.
@@ -219,7 +219,7 @@ Qed.
 
 Lemma flow_eq0 u v: g (u, v) = 0 -> g(v, u) = 0 -> f (u, v) = 0.
 Proof.
-move=> zg1 zg2; apply/eqP; rewrite eqr_le.
+move=> zg1 zg2; apply/eqP; rewrite eq_le.
 by rewrite flow_ge0 // andbT flow_antisym oppr_le0 flow_ge0.
 Qed.
 End CoreFlowTheory.
@@ -386,7 +386,7 @@ by rewrite ffunE /preresidual subr_gt0 (asegmentP he).
 Qed.
 
 Lemma aweight_ge0 (a : apath) : 0 <= aweight a.
-Proof. by apply/ltrW/aweight_gt0. Qed.
+Proof. by apply/ltW/aweight_gt0. Qed.
 
 Lemma aweight_flow_le (a : apath) (e : edge T) :
   asegment a e -> aweight a <= residual f e.
@@ -515,7 +515,7 @@ Proof. apply/isflowP => [e|u v|v].
 - rewrite /preflow_of_apath; case: ifPn => [|_].
   + by move=> /aweight_flow_le; case: e.
   case: ifPn => _; last by rewrite network_ge0.
-  apply/(@ler_trans _ 0)/network_ge0.
+  apply/(@le_trans _ _ 0)/network_ge0.
   by rewrite oppr_le0 aweight_ge0.
 - rewrite /preflow_of_apath /=; case: ifPn.
   + by move/asegment_asym/negbTE=> ->; rewrite opprK.
@@ -752,7 +752,7 @@ pose P u := [exists i : 'I_#|T|, [exists s : i.-tuple T,
     [rel x y | 0 < r (x, y)] ⊤ [seq ↓ x | x <- rcons s u]]].
 exists P; rewrite cweightE (flow_cflow P) cflowE.
 apply/eq_bigr=> /= u uP; apply/eq_bigr=> /= v vNP.
-have /(_ (u, v)) := isflow_lecp solx; rewrite ler_eqVlt.
+have /(_ (u, v)) := isflow_lecp solx; rewrite le_eqVlt.
 case/orP=> [/eqP->//|]; elim/vertexW: v vNP => // [|v] vNP h.
 + have: exists _ : apath (Flow solx), true.
   * case: u uP h => -[[_|_]|u uP] h //.
@@ -773,7 +773,7 @@ case/orP=> [/eqP->//|]; elim/vertexW: v vNP => // [|v] vNP h.
   * rewrite flow_pb_of_vector; set fb := (X in X \is a _).
     apply/(@eq_isflow _ _ fa fb); last by apply/isflow_flow.
     by move=> y; rewrite /fb /flow_of_vector mxE enum_rankK.
-  suff ->: flow_pb.(lppb_cost) z = `|fa| by rewrite lerNgt ltf.
+  suff ->: flow_pb.(lppb_cost) z = `|fa| by rewrite leNgt ltf.
   rewrite {}/z /flow_pb /flow_cost /= !fmassE.
   apply/eq_bigr=> /= v _; rewrite /flow_of_vector.
   by rewrite !mxE !(enum_valK, enum_rankK).
@@ -812,10 +812,10 @@ case/orP=> [/eqP->//|]; elim/vertexW: v vNP => // [|v] vNP h.
         by rewrite negb_or vs andbT; apply/eqP=> /esym.
       rewrite map_rcons rcons_path hp /= ffunE.
       by rewrite map_rcons last_rcons /= /preresidual subr_gt0.
-    case: (@leq_size_perm _ (rcons s u) (enum T)) => //.
+    case: (@uniq_min_size _ (rcons s u) (enum T)) => //.
     - by move=> y _; rewrite mem_enum.
     - by rewrite (eqP hz) cardT.
-    move/(_ v); rewrite mem_rcons in_cons (negbTE vs) orbF.
+    move=> _ /(_ v); rewrite mem_rcons in_cons (negbTE vs) orbF.
     by rewrite mem_enum => /eqP /= /esym.
 Qed.
 End MaxFlowMinCut.

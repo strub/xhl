@@ -33,8 +33,8 @@ Definition pack (x : T) :=
   fun bT b & phant_id (Choice.class bT) b =>
   Pack (@Class T b x) T.
 
-Definition eqType := @Equality.Pack cT xclass xT.
-Definition choiceType := @Choice.Pack cT xclass xT.
+Definition eqType := @Equality.Pack cT xclass.
+Definition choiceType := @Choice.Pack cT xclass.
 End ClassDef.
 
 Module Import Exports.

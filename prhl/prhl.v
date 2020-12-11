@@ -9,7 +9,7 @@ Unset Strict Implicit.
 Unset Printing Implicit Defensive.
 Unset SsrOldRewriteGoalsOrder.
 
-Import GRing.Theory Num.Theory.
+Import GRing.Theory Num.Theory Order.Theory.
 
 Local Open Scope ring_scope.
 Local Open Scope syn_scope.
@@ -150,7 +150,7 @@ Lemma prhl_eqpr P c1 c2 (E1 E2 : assn) m:
   -> prhl P c1 c2 [pred m | E1 m.1 == E2 m.2]
   -> \P_[ssem c1 m.1] E1 = \P_[ssem c2 m.2] E2.
 Proof.
-case: m => [m1 m2] Pm h; rewrite (rwP eqP) eqr_le (@prhl_lepr P) //=.
+case: m => [m1 m2] Pm h; rewrite (rwP eqP) eq_le (@prhl_lepr P) //=.
 + apply/prhl_conseq: h => // {m1 m2 Pm} -[m1 m2] /=.
   by move/eqP=> ->; apply/implyP.
 apply/(prhl_lepr (P := pswap P) (m := (m2, m1))) => //.
@@ -223,7 +223,7 @@ Qed.
 Lemma prhl_if P e1 e2 c1 c'1 c2 c'2 Q :
      prhl (P /\ `[{    e1#'1 &&    e2#'2 }])%A c1  c2  Q
   -> prhl (P /\ `[{ ~~ e1#'1 && ~~ e2#'2 }])%A c'1 c'2 Q
-  -> prhl (P /\ `[{ e1#'1 == e2#'2 }])%A
+  -> prhl (P /\ `[{ e1#'1 =b e2#'2 }])%A
        (If e1 then c1 else c'1)
        (If e2 then c2 else c'2)
      Q.
@@ -267,7 +267,7 @@ Qed.
 
 (* -------------------------------------------------------------------- *)
 Lemma prhl_while I e1 e2 c1 c2 :
-     (forall m : rmem, I m -> `[{ e1#'1 == e2#'2 }] m)
+     (forall m : rmem, I m -> `[{ e1#'1 =b e2#'2 }] m)
   -> (prhl (I /\ `[{ e1#'1 && e2#'2 }])%A c1 c2 I)
   -> 
 
@@ -284,12 +284,12 @@ pose νe n m := \dlet_(m' <- νn n m) if esem e1 m'.1 then dnull else dunit m'.
 move=> m Im; pose ν n := νe n m.
 have rg_νn: forall n, range I (νn n m).
 + elim=> [|n ih] /=; first by apply/range_dunit.
-  apply/(range_dlet ih) => {m Im ν ih} m Im; rewrite /ν1.
+  apply/(range_dlet ih) => {Im ν ih} m Im; rewrite /ν1.
   case: {-}_ / idP; first by move=> p; case: prhlw.
   by move=> _; apply/range_dunit.
 have mono_ν n : ν n <=1 ν n.+1.
 + move=> /= m'; rewrite /ν /νe dlet_dlet -/(νn _ _).
-  apply/le_dlet => //= {m'} m' Im' m''.
+  apply/le_dlet => //= {}m' Im' m''.
   case: ifPn => [he1|hNe1]; first by apply/lef_dnull.
   rewrite dunit1E; case: eqP => /= [<-|_]; last by apply/ge0_mu.
   have /distr_eqP ->: ν1 m' =1 dunit m'.
@@ -302,7 +302,7 @@ exists (dlim ν).
     rewrite -(iffLR (distr_eqP _ _) (dlim_bump (fun _ => _ m.2))).
   apply/iscoupling_dlim => [n|n k le_nk]; last first.
   * move=> m'; rewrite -[k](subnK le_nk); elim: (_ - _)%N => //.
-    by move=> n' ihn'; rewrite addSn; apply/(ler_trans ihn').
+    by move=> n' ihn'; rewrite addSn; apply/(le_trans ihn').
   rewrite !whilen_iterc !ssemE; apply/iscoupling_dlet => /=; last first.
   * move=> m' Im'; rewrite !ssemE; move/rg_νn/hs: Im'.
     rewrite !ssemE => /eqP <-; case: ifPn => _.

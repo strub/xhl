@@ -13,6 +13,12 @@ Import GRing.Theory Num.Theory.
 
 Local Open Scope ring_scope.
 
+(* -------------------------------------------------------------------- *)
+Declare Scope syn_scope.
+Declare Scope xsyn_scope.
+Declare Scope vsyn_scope.
+Declare Scope mem_scope.
+
 Delimit Scope syn_scope with S.
 Delimit Scope xsyn_scope with X.
 Delimit Scope vsyn_scope with V.
@@ -117,7 +123,7 @@ Canonical vars_eqType := EqType (vars_ I T) vars_eqMixin.
 End VarsEqType.
 
 Canonical tvars_eqType (I : eqType) := Eval hnf in @tag_eqType
-  (EqType ihbType (comparableClass (fun x y => pselect (x = y))))
+  (EqType ihbType (comparableMixin (fun x y => pselect (x = y))))
   (vars_eqType^~ I).
 
 (* -------------------------------------------------------------------- *)
@@ -197,7 +203,7 @@ Lemma get_set_eq {T : ihbType} (m : coremem) (x : ident) (v : T) :
 Proof.
 rewrite /coremem_get /=; case: (pselect _) => // eq; rewrite eqxx.
 suff ->: eq = erefl T by done.
-by apply/UIP_dec=> {x} x y; apply/pselect.
+by apply/UIP_dec=> {}x y; apply/pselect.
 Qed.
 
 Lemma get_set_nex {T U : ihbType} (m : coremem) (x y : ident) (v : T) :
@@ -218,7 +224,7 @@ Proof. by move=> [/get_set_net |/get_set_nex] ->. Qed.
 Lemma coremem_comparable : comparable coremem.
 Proof. by move=> m1 m2; apply/pselect. Qed.
 
-Definition coremem_eqMixin := comparableClass coremem_comparable.
+Definition coremem_eqMixin := comparableMixin coremem_comparable.
 Canonical  coremem_eqType  := Eval hnf in EqType coremem coremem_eqMixin.
 
 Axiom coremem_choice : choiceMixin coremem.
@@ -329,10 +335,15 @@ Notation prp     := (@prp_ _ cmem).
 (* -------------------------------------------------------------------- *)
 Notation app2_ f x1 x2 := (app_ (app_ f x1) x2).
 
+Reserved Notation "x =b y" (at level 70, no associativity).
+Reserved Notation "x =i y" (at level 70, no associativity).
+
+Definition beq (x y : bool) : bool := x == y.
+Definition ieq (x y : int ) : bool := x == y.
+
 Notation "c %:S"    := (@cst_ _ _ _ c) (at level 2, format "c %:S").
-Notation "e1 == e2" := (app2_ (cst_ eq_op) e1 e2) : xsyn_scope.
-Notation "e1 <= e2" := (app2_ (cst_ <=%R ) e1 e2) : xsyn_scope.
-Notation "e1 < e2"  := (app2_ (cst_ <%R  ) e1 e2) : xsyn_scope.
+Notation "e1 =b e2" := (app2_ (cst_ beq) e1 e2)   : xsyn_scope.
+Notation "e1 =i e2" := (app2_ (cst_ ieq) e1 e2)   : xsyn_scope.
 Notation "e1 || e2" := (app2_ (cst_ orb  ) e1 e2) : xsyn_scope.
 Notation "e1 && e2" := (app2_ (cst_ andb ) e1 e2) : xsyn_scope.
 Notation "~~ e"     := (app_ (cst_ negb) e)       : xsyn_scope.
@@ -340,15 +351,6 @@ Notation "e1 + e2"  := (app2_ (cst_ +%R) e1 e2)   : xsyn_scope.
 Notation "e1 * e2"  := (app2_ (cst_ *%R) e1 e2)   : xsyn_scope.
 Notation "e1 :: e2" := (app2_ (cst_ cons) e1 e2)  : xsyn_scope.
 Notation "` x"      := (@var_ _ _ _ x%V)          : xsyn_scope.
-
-Notation "e1 == e2 :> T" := (app2_ (cst_ eq_op) (e1 : T) (e2 : T))
- (only parsing) : xsyn_scope.
-
-Notation "e1 <= e2 :> T" := (app2_ (cst_ <=%R ) (e1 : T) (e2 : T))
- (only parsing) : xsyn_scope.
-
-Notation "e1 < e2 :> T"  := (app2_ (cst_ <%R  ) (e1 : T) (e2 : T))
- (only parsing) : xsyn_scope.
 
 (* -------------------------------------------------------------------- *)
 Section SynInject.

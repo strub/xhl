@@ -15,6 +15,7 @@ Lemma orrP a b : or_spec b a b (a || b).
 Proof. rewrite orbC;apply orlP. Qed.
 
 (* -------------------------------------------------------------------- *)
+Declare Scope assn.
 Delimit Scope assn with A.
 
 Definition predImpl {T} (P Q:pred T) := 

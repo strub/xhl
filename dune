@@ -1,0 +1,8 @@
+(coq.theory
+  (name xhl)
+  (package xhl)
+  (flags -w -parsing
+         -w -projection-no-head-constant
+         -w -redundant-canonical-projection
+         -w -ambiguous-paths))
+(include_subdirs qualified)

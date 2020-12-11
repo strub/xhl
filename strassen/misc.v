@@ -8,7 +8,7 @@ Unset Strict Implicit.
 Unset Printing Implicit Defensive.
 Unset SsrOldRewriteGoalsOrder.
 
-Import GRing.Theory Num.Theory.
+Import GRing.Theory Num.Theory Order.Theory.
 
 Local Open Scope ring_scope.
 
@@ -157,8 +157,8 @@ elim: s => {i0} // i s ih _; case: (s =P [::]) => [{ih}->|].
 move/eqP=> /ih[{ih} j j_in_s ih]; case: (lerP (F i) (F j)).
 + move=> le_FiFj; exists i; first by rewrite mem_head.
   move=> k; rewrite in_cons => /orP[/eqP->//|/ih].
-  by apply/(ler_trans le_FiFj).
-+ move/ltrW=> le_FjFi; exists j; first by rewrite mem_behead.
+  by apply/(le_trans le_FiFj).
++ move/ltW=> le_FjFi; exists j; first by rewrite mem_behead.
   by move=> k; rewrite in_cons => /orP[/eqP->|/ih].
 Qed.
 
@@ -198,9 +198,9 @@ Context {K : fieldType} {vT : vectType K}.
 Lemma sub_free (X Y : seq vT) :
   {subset X <= Y} -> free Y -> uniq X -> free X.
 Proof.
-move=> leXY frY uqX; have /perm_eqlP peq := perm_filterC (mem X) Y.
+move=> leXY frY uqX; have /permPl peq := perm_filterC (mem X) Y.
 have := frY; rewrite -(perm_free peq) => /catl_free.
-rewrite -(@perm_free _ _ X) //; apply/uniq_perm_eq => // [|x].
+rewrite -(@perm_free _ _ X) //; apply/uniq_perm => // [|x].
 + by rewrite filter_uniq // free_uniq.
 + by rewrite mem_filter andbC; apply/esym/andb_idl => /leXY.
 Qed.
@@ -235,12 +235,12 @@ End PR.
 (* -------------------------------------------------------------------- *)
 Lemma perm_cat2lE {T : eqType} (s1 s2 s3 : seq T) :
   perm_eq s2 s3 -> perm_eql (s1 ++ s2) (s1 ++ s3).
-Proof. by move=> h; apply/perm_eqlP; rewrite perm_cat2l. Qed.
+Proof. by move=> h; apply/permPl; rewrite perm_cat2l. Qed.
 
 (* -------------------------------------------------------------------- *)
 Lemma perm_cat2rE {T : eqType} (s1 s2 s3 : seq T) :
   perm_eq s2 s3 -> perm_eql (s2 ++ s1) (s3 ++ s1).
-Proof. by move=> h; apply/perm_eqlP; rewrite perm_cat2r. Qed.
+Proof. by move=> h; apply/permPl; rewrite perm_cat2r. Qed.
 
 (* -------------------------------------------------------------------- *)
 Lemma perm_cat {T : eqType} (s1 s2 t1 t2 : seq T) :
@@ -261,7 +261,7 @@ Lemma enum_sum_perm {T U : finType} :
 Proof.
 have inj_inl: injective inl by move=> T1 T2 x y [].
 have inj_inr: injective inr by move=> T1 T2 x y [].
-apply/uniq_perm_eq; rewrite ?enum_uniq //.
+apply/uniq_perm; rewrite ?enum_uniq //.
 + rewrite cat_uniq ?map_inj_uniq -?enumT ?enum_uniq ?andbT //=.
   by apply/hasPn=> /= x /mapP[u _ ->]; apply/mapP; case.
 move=> x; apply/esym; rewrite mem_cat mem_enum [in RHS]/in_mem /=.
@@ -274,7 +274,7 @@ Lemma enum_option_perm {T : finType} :
     (enum {: option T})
     (None :: [seq Some t | t : T]).
 Proof.
-apply/uniq_perm_eq; rewrite ?enum_uniq //=.
+apply/uniq_perm; rewrite ?enum_uniq //=.
 + apply/andP; split.
   * by apply/negP=> /mapP[].
   * by rewrite map_inj_uniq ?enum_uniq // => x y [].
@@ -295,7 +295,7 @@ Lemma big_sum {I J : finType} (P : pred (I + J)) (F : I + J -> R) :
       (\big[op/1]_(i | P (← i)) F (← i))
     * (\big[op/1]_(j | P (→ j)) F (→ j)).
 Proof.
-rewrite /index_enum -!enumT (eq_big_perm _ enum_sum_perm).
+rewrite /index_enum -!enumT (perm_big _ enum_sum_perm).
 by rewrite big_cat !big_map.
 Qed.
 
@@ -304,7 +304,7 @@ Lemma big_option {I : finType} (P : pred (option I)) (F : option I -> R) :
       (if P None then F None else 1)
     * (\big[op/1]_(i | P (Some i)) F (Some i)).
 Proof.
-rewrite /index_enum -!enumT (eq_big_perm _ enum_option_perm) big_cons.
+rewrite /index_enum -!enumT (perm_big _ enum_option_perm) big_cons.
 by rewrite -[IFF](Monoid.mul1m op) -fun2_if if_same big_map.
 Qed.
 End BigOp.
@@ -384,7 +384,7 @@ Proof. by rewrite next_nth mem_head /= eqxx nth0. Qed.
 Section CompMonoid.
 Context {T: Type}.
 
-Notation comp := (@funcomp T T T tt).
+Notation comp := (@comp T T T).
 
 Definition compA : associative comp.
 Proof. done. Qed.
@@ -462,18 +462,18 @@ Proof. split.
 + case/summable_seqP => M ge0_M leM; apply/summable_seqP => /=.
   exists (M + `|S None|); first by rewrite addr_ge0.
   move=> J uqJ; rewrite (bigID isSome) ler_add //=.
-  - apply/(ler_trans _ (leM (pmap idfun J) _)); last first.
+  - apply/(le_trans _ (leM (pmap idfun J) _)); last first.
     * by apply/(pmap_uniq (g := some)) => // -[].
     rewrite -(big_map _ predT (fun x => `|S x|)) pmapS_filter.
     by rewrite map_id /= big_filter.
   - case/boolP: (None \in J) => NoneJ; last first.
     * rewrite big_seq_cond big_pred0 //= => x; rewrite andbC.
       by case: x => //; rewrite (negbTE NoneJ).
-    rewrite (eq_big_perm _ (perm_to_rem NoneJ)) big_cons /=.
+    rewrite (perm_big _ (perm_to_rem NoneJ)) big_cons /=.
     rewrite big_seq_cond big1 ?addr0 // => x.
     by rewrite mem_rem_uniq //= !inE andbAC; case: x.
 + case/summable_seqP => /= M ge0_M leM; apply/summable_seqP.
-  exists M => // J uqJ; apply/(ler_trans _ (leM (map some J) _)).
+  exists M => // J uqJ; apply/(le_trans _ (leM (map some J) _)).
   - by rewrite big_map.
   - by rewrite map_inj_uniq // => x y [].
 Qed.
@@ -503,7 +503,7 @@ move/dinsuppP; rewrite dlimE; case: nlimP => // -[] // l cvg.
 move/eqP => /= nz_l; have gt0_absl: 0 < `|l| by rewrite normr_gt0.
 case/ncvg_abs/(_ (NFin _ gt0_absl)): cvg=> K cvg; exists K => n.
 move/cvg; rewrite inE ltr_distl => /andP[h _]; apply/dinsuppP.
-by apply/eqP; rewrite -normr_gt0 (ler_lt_trans _ h) ?subrr.
+by apply/eqP; rewrite -normr_gt0 (le_lt_trans _ h) ?subrr.
 Qed.
 
 (* -------------------------------------------------------------------- *)
@@ -520,7 +520,7 @@ Lemma homoS_ler {T : numDomainType} (f : nat -> T) :
   (forall x, f x <= f x.+1) -> {homo f : x y / (x <= y)%N >-> x <= y}.
 Proof.
 move=> homo x y lt_xy; rewrite -(subnK lt_xy).
-by elim: (y - _)%N => // n ih; rewrite addSn (ler_trans ih (homo _)).
+by elim: (y - _)%N => // n ih; rewrite addSn (le_trans ih (homo _)).
 Qed.
 
 (* -------------------------------------------------------------------- *)
@@ -531,7 +531,7 @@ Lemma natpred_finiteN (E : pred nat) :
 Proof.
 move=> finNE; have h s : exists n, (n > \max_(x <- s) x)%N && E n.
 + set N := \max_(x <- s) x; pose r := iota 0 N.+1 ++ s.
-  apply: contrapR (finNE r) => /asboolPn /forallp_asboolPn h x.
+  apply: contra_notP (finNE r) => /asboolPn /forallp_asboolPn h x.
   move=> xE; rewrite mem_cat; have /negP := h x.
   rewrite negb_and -leqNgt mem_iota /= add0n ltnS.
   by rewrite /in_mem /= in xE; rewrite xE orbF => ->.

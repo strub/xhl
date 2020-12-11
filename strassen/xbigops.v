@@ -23,10 +23,10 @@ Lemma partition_big_seq : uniq r ->
 Proof.
 move=> uq_r; set s := undup _; pose g y := [seq x <- r | p x == y].
 suff h: perm_eq r (flatten [seq g y | y <- s]).
-  rewrite (eq_big_perm _ h) big_flatten big_map; apply/eq_bigr.
+  rewrite (perm_big _ h) big_flatten big_map; apply/eq_bigr.
   move=> y _; rewrite !big_seq; apply/eq_bigr=> x.
   by rewrite mem_filter => /andP[/eqP <-].
-apply/uniq_perm_eq => //.
+apply/uniq_perm => //.
   have: uniq s by apply/undup_uniq. elim: s => //.
   move=> y s ih /andP[yNs /ih uq_s] /=; rewrite cat_uniq.
   rewrite uq_s filter_uniq ?andbT //=; apply/hasPn=> /= x.
