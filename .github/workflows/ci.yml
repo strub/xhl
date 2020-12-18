@@ -2,14 +2,15 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
-        coq_version:
-        - 8.12
+        image:
+        - 'mathcomp/mathcomp:1.11.0-coq-8.11'
+        - 'mathcomp/mathcomp:1.11.0-coq-8.12'
       fail-fast: false
     steps:
     - uses: actions/checkout@v2
     - uses: coq-community/docker-coq-action@v1
       with:
-        coq_version: ${{ matrix.coq_version }}
+        custom_image: ${{ matrix.image }}
